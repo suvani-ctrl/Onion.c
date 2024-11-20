@@ -37,10 +37,34 @@ int main(int argc, char *argv[])
     {
         int8 vn;
         int8 CD;
-        int16 _;
-        int32 __;
+        int16 _;  
+        int32 __; 
     };
 
     typedef struct Proxy_Request Req;
     typedef struct Proxy_Response Resp;
+
+    int SocketFd;
+    struct sockaddr_in sock;
+
+    SocketFd = socket(AF_INET, SOCK_STREAM, 0);
+    if (SocketFd < 0)
+    {
+        perror("Socket Error!");
+        return -1;
+    }
+
+    sock.sin_family = AF_INET;
+    sock.sin_port = htons(port);
+    sock.sin_addr.s_addr = inet_addr(host);
+
+    if (connect(SocketFd, (struct sockaddr *)&sock, sizeof(sock)) < 0)
+    {
+        perror("connect");
+        return -1;
+    }
+    printf("Connected To The Proxy\n");
+    close(SocketFd);
+
+    return 0;
 }
