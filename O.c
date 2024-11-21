@@ -66,5 +66,18 @@ int main(int argc, char *argv[])
     printf("Connected To The Proxy\n");
     close(SocketFd);
 
+//chech here pls 
+    Req *request(const char *dstip, const int dstport)
+    {
+        Req *req;
+        req = malloc(reqsize);
+        req -> vn = 4; // -> is basically same as . format but when were using pointe rto a struct we use it !
+        req -> cd = 1;
+        req -> Destination_Port = htons(1);
+        req -> Destination_IP = inet_addr(Destination_IP);
+
+    }
+//here 
+
     return 0;
 }
