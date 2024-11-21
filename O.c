@@ -27,8 +27,8 @@ struct Proxy_Request {
 struct Proxy_Response {
     int8 vn;
     int8 CD;
-    int16 _;
-    int32 __; 
+    int16 _;  
+    int32 __;  
 };
 
 struct Proxy_Request *request(const char *dstip, const int dstport) {
@@ -71,13 +71,20 @@ int main(int argc, char *argv[]) {
 
     if (connect(SocketFd, (struct sockaddr *)&sock, sizeof(sock)) < 0) {
         perror("Connect Error");
+        close(SocketFd);
         return -1;
     }
 
     printf("Connected to the Proxy\n");
+
     struct Proxy_Request *req = request(PROXY, PROXYPORT);
     if (req != NULL) {
-        write(SocketFd, req, reqsize);
+        if (write(SocketFd, req, reqsize) < 0) {
+            perror("Write Error");
+            free(req);
+            close(SocketFd);
+            return -1;
+        }
         free(req);
     }
 
@@ -85,10 +92,21 @@ int main(int argc, char *argv[]) {
     memset(buf, 0, ressize);
 
     if (read(SocketFd, buf, ressize) < 1) {
-        perror("read");
+        perror("Read Error");
         close(SocketFd);
         return -1;
     }
+
+    struct Proxy_Response *res = (struct Proxy_Response *)buf;
+
+    int success = (res->CD == 90);
+    if (!success) {
+        fprintf(stderr, "Unable to traverse the proxy, error code: %d\n", res->CD);
+        close(SocketFd);
+        return -1;
+    }
+
+    printf("Successfully connected to the Proxy!\n");
 
     close(SocketFd);
 
